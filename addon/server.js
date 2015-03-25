@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import { pluralize } from './utils/inflector';
 import Pretender from 'pretender';
-import Db from './db';
+import Db from './orm/db';
 import controller from './controller';
 
 /*
@@ -29,7 +29,6 @@ function extractStubArguments(/* path, handler, code, options */) {
 
 /*
   The Mirage server, which has a db and an XHR interceptor.
-
   Requires an environment.
 */
 export default function(options) {
@@ -86,7 +85,6 @@ export default function(options) {
 
   /*
     Pretender instance with default config.
-
     TODO: Inject?
   */
   this.interceptor = new Pretender(function() {
@@ -107,7 +105,6 @@ export default function(options) {
 
   /*
     Db instance
-
     TODO: Inject?
   */
   this.db = new Db();
@@ -128,7 +125,7 @@ export default function(options) {
 
   this.create = function(type, overrides) {
     var collection = pluralize(type);
-    var currentRecords = this.db[collection];
+    var currentRecords = this.db[collection].all();
     var sequence = currentRecords ? currentRecords.length: 0;
     if (!this._factoryMap || !this._factoryMap[type]) {
       throw "You're trying to create a " + type + ", but no factory for this type was found";
