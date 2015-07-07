@@ -19,7 +19,8 @@ module.exports = {
         exports: { 'pretender': ['default'] }
       });
       app.import(app.bowerDirectory + '/ember-inflector/ember-inflector.js');
-      app.import(app.bowerDirectory + '/lodash/lodash.js');
+      // HACK: use old version of lodash 2.2.1 instead for applications
+      app.import(app.bowerDirectory + '/lodash/dist/lodash.js');
       app.import(app.bowerDirectory + '/Faker/build/build/faker.js');
     }
   },
