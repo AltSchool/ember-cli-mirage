@@ -49,6 +49,7 @@
   "devDependencies": {
     "@ember/jquery": "^1.1.0",
     "@ember/optional-features": "^2.0.0",
+    "@faker-js/faker": "^5.5.3",
     "babel-eslint": "^10.0.3",
     "broccoli-asset-rev": "^3.0.0",
     "ember-ajax": "^5.0.0",
@@ -83,7 +84,6 @@
     "escape-string-regexp": "^4.0.0",
     "eslint-plugin-ember": "^8.1.0",
     "eslint-plugin-node": "^11.0.0",
-    "faker": "^5.1.0",
     "fastboot": "^3.0.2",
     "js-yaml": "^4.0.0",
     "jsdom": "^16.2.2",
