@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@ember/jquery": "*",
+    "@faker-js/faker": "*",
     "broccoli-asset-rev": "*",
     "ember-ajax": "*",
     "ember-auto-import": "*",
@@ -40,7 +41,6 @@
     "ember-resolver": "*",
     "ember-source": "*",
     "eslint-plugin-ember": "*",
-    "faker": "*",
     "fastboot": "*",
     "jsdom": "*",
     "loader.js": "*",
