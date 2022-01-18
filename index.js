@@ -14,8 +14,7 @@ module.exports = {
         sourceMap: 'dist/route-recognizer.js.map'
       }),
       'fake-xml-http-request': npmAsset('fake_xml_http_request.js'),
-      'pretender': npmAsset('pretender.js'),
-      'faker': npmAsset('build/build/faker.js')
+      'pretender': npmAsset('pretender.js')
     }
   },
 

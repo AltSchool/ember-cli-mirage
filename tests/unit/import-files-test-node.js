@@ -19,7 +19,6 @@ describe('import files', function() {
       'vendor/fake-xml-http-request/fake_xml_http_request.js',
       'vendor/route-recognizer/dist/route-recognizer.js',
       'vendor/pretender/pretender.js',
-      'vendor/faker/build/build/faker.js',
       'vendor/ember-cli-mirage/pretender-shim.js'
     ]);
   });
@@ -33,7 +32,6 @@ describe('import files', function() {
         'vendor/fake-xml-http-request/fake_xml_http_request.js',
         'vendor/route-recognizer/dist/route-recognizer.js',
         'vendor/pretender/pretender.js',
-        'vendor/faker/build/build/faker.js',
         'vendor/ember-cli-mirage/pretender-shim.js'
       ]);
     });
@@ -47,7 +45,6 @@ describe('import files', function() {
       'vendor/fake-xml-http-request/fake_xml_http_request.js',
       'vendor/route-recognizer/dist/route-recognizer.js',
       'vendor/pretender/pretender.js',
-      'vendor/faker/build/build/faker.js',
       'vendor/ember-cli-mirage/pretender-shim.js'
     ]);
   });
