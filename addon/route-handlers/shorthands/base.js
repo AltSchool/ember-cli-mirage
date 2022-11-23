@@ -1,36 +1,18 @@
-import { toCollectionName } from 'ember-cli-mirage/utils/normalize-name';
-import BaseRouteHandler from '../base';
+import { _routeHandlersShorthandsBase } from 'miragejs';
+import { deprecateNestedImport } from '../../deprecate-imports';
 
-export default class BaseShorthandRouteHandler extends BaseRouteHandler {
+/**
+ @class DeprecatedBaseShorthandRouteHandler
+ @hide
+ */
+export default class DeprecatedBaseShorthandRouteHandler extends _routeHandlersShorthandsBase {
+  constructor(...args) {
+    deprecateNestedImport(
+      `Importing 'BaseShorthandRouteHandler' from 'ember-cli-mirage/route-handlers/shorthands/base' is deprecated. ` +
+        `This wasn't intended to be a public API. If you absolute know what you are doing, ` +
+        `install the \`miragejs\` package and use \`import { _routeHandlersShorthandsBase } from 'miragejs';\` instead.`
+    );
 
-  constructor(schema, serializerOrRegistry, shorthand, path, options = {}) {
-    super();
-    shorthand = shorthand || this.getModelClassFromPath(path);
-    this.schema = schema;
-    this.serializerOrRegistry = serializerOrRegistry;
-    this.shorthand = shorthand;
-    this.options = options;
-
-    let type = Array.isArray(shorthand) ? 'array' : typeof shorthand;
-    if (type === 'string') {
-      let modelClass = this.schema[toCollectionName(shorthand)];
-      this.handle = (request) => {
-        return this.handleStringShorthand(request, modelClass);
-      };
-    } else if (type === 'array') {
-      let modelClasses = shorthand.map((modelName) => this.schema[toCollectionName(modelName)]);
-      this.handle = (request) => {
-        return this.handleArrayShorthand(request, modelClasses);
-      };
-    }
+    super(...args);
   }
-
-  // handleStringShorthand() {
-  //
-  // }
-  //
-  // handleArrayShorthand() {
-  //
-  // }
-
 }

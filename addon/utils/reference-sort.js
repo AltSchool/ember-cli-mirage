@@ -1,50 +1,17 @@
-// jscs:disable disallowVar, requireArrayDestructuring
-import _uniq from 'lodash/uniq';
-import _flatten from 'lodash/flatten';
+import { _utilsReferenceSort } from 'miragejs';
+import { deprecateNestedImport } from '../deprecate-imports';
 
-export default function(edges) {
-  let nodes = _uniq(_flatten(edges));
-  let cursor = nodes.length;
-  let sorted = new Array(cursor);
-  let visited = {};
-  let i = cursor;
+/**
+ @function referenceSort
+ @hide
+ */
+export default function referenceSort(...args) {
+  const message =
+    `Importing 'referenceSort' from 'ember-cli-mirage/utils/reference-sort' is deprecated. ` +
+    `This wasn't intended to be a public API. If you absolute know what you are doing, ` +
+    `install the \`miragejs\` package and use \`import { _utilsReferenceSort } from 'miragejs';\` instead.`;
 
-  let visit = function(node, i, predecessors) {
+  deprecateNestedImport(message);
 
-    if (predecessors.indexOf(node) >= 0) {
-      throw new Error(`Cyclic dependency in properties ${JSON.stringify(predecessors)}`);
-    }
-
-    if (visited[i]) {
-      return;
-    } else {
-      visited[i] = true;
-    }
-
-    let outgoing = edges.filter(function(edge) {
-      return edge && edge[0] === node;
-    });
-    i = outgoing.length;
-    if (i) {
-      let preds = predecessors.concat(node);
-      do {
-        let pair = outgoing[--i];
-        let child = pair[1];
-        if (child) {
-          visit(child, nodes.indexOf(child), preds);
-        }
-      } while (i);
-    }
-
-    sorted[--cursor] = node;
-  };
-
-  while (i--) {
-    if (!visited[i]) {
-      visit(nodes[i], i, []);
-    }
-  }
-
-  return sorted.reverse();
-
+  return _utilsReferenceSort(...args);
 }
