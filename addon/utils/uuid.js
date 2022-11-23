@@ -1,10 +1,17 @@
-/*
-  UUID generator
-*/
-export default function() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0;
-    var v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+import { _utilsUuid } from 'miragejs';
+import { deprecateNestedImport } from '../deprecate-imports';
+
+/**
+ @function uuid
+ @hide
+ */
+export default function uuid(...args) {
+  const message =
+    `Importing 'uuid' from 'ember-cli-mirage/utils/reference-sort' is deprecated. ` +
+    `This wasn't intended to be a public API. If you absolute know what you are doing, ` +
+    `install the \`miragejs\` package and use \`import { _utilsUuid } from 'miragejs';\` instead.`;
+
+  deprecateNestedImport(message);
+
+  return _utilsUuid(...args);
 }

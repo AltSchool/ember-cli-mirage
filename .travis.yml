@@ -1,47 +1,85 @@
 ---
 language: node_js
 node_js:
-  - "4"
-  - "6"
-  - "7"
+  - "10"
 
-sudo: required
+sudo: false
 dist: trusty
 
+addons:
+  chrome: stable
+
 cache:
-  directories:
-    - $HOME/.npm
-    - $HOME/.cache # includes bower's cache
+  yarn: true
 
 env:
-  # we recommend testing LTS's and latest stable release (bonus points to beta/canary)
-  - EMBER_TRY_SCENARIO=ember-1.13
-  - EMBER_TRY_SCENARIO=ember-lts-2.4
-  - EMBER_TRY_SCENARIO=ember-release
-  - EMBER_TRY_SCENARIO=ember-beta
-  - EMBER_TRY_SCENARIO=ember-canary
-
-matrix:
-  fast_finish: true
-  allow_failures:
-    - env: EMBER_TRY_SCENARIO=ember-canary
-
-before_install:
-  - export CHROME_BIN=/usr/bin/google-chrome
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - sudo apt-get update
-  - sudo apt-get install -y libappindicator1 fonts-liberation
-  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  - sudo dpkg -i google-chrome*.deb
-  - npm config set spin false
-  - npm install -g bower phantomjs-prebuilt
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
 
 install:
-  - npm install
-  - bower install
+  - yarn install --no-lockfile --non-interactive
+
+notifications:
+  email: false
+
+# Identifies `a.b.c-xxx.n` tags as pre-releases, and `a.b.c` as stable releases
+before_deploy: |
+  function npm_dist_tag() {
+    if [[ "$TRAVIS_TAG" = *"-"* ]]; then
+      echo "next"
+    else
+      echo "latest"
+    fi
+  }
+
+jobs:
+  fail_fast: true
+
+  include:
+    - stage: locked dependencies
+      env: NAME=browser tests
+      install: yarn install
+      script: yarn test:browser
+    - env: NAME=node tests
+      install: yarn install
+      script: yarn test:test-projects
+
+    - stage: floating dependencies
+      env: NAME=browser tests
+      script: yarn test:browser
+    - env: NAME=node tests
+      script: yarn test:test-projects
+
+    - stage: versioned tests
+      env: EMBER_TRY_SCENARIO=ember-lts-3.20
+    - env: EMBER_TRY_SCENARIO=ember-release
+    - env: EMBER_TRY_SCENARIO=ember-beta
+    - env: EMBER_TRY_SCENARIO=ember-canary
+    - env: EMBER_TRY_SCENARIO=ember-default
+    - env: EMBER_TRY_SCENARIO=ember-default-with-jquery
+
+    - stage: deploy
+      if: (branch = master OR tag IS present) AND type = push
+      env: NAME=deploy
+      script: node_modules/.bin/ember deploy production
+
+    - stage: npm release
+      install: skip
+      script: skip
+      deploy:
+        provider: npm
+        tag: $(npm_dist_tag)
+        email: sam.selikoff@gmail.com
+        api_key:
+          secure: O6cP0nTiCbA+MuD6hRKdyyd6DWTFR/dc9klB10zXTnrwajjzLmenvvshPUv+F6lHCpb2SfrWW6cpFjZ61BPwKaaalF9u8encNkGlDYGtO77sWJu6LuJFeWPZnAC9rdAw4hPjz+gqTL+leeDMHzjB32VRqy2cpwFzet3e+W2eUuk=
+        on:
+          tags: true
+          repo: miragejs/ember-cli-mirage
+
+  allow_failures:
+    - env: EMBER_TRY_SCENARIO=ember-beta
+    - env: EMBER_TRY_SCENARIO=ember-canary
 
 script:
-  # Usually, it's ok to finish the test scenario without reverting
-  #  to the addon's original dependency state, skipping "cleanup".
-  - ember try:one $EMBER_TRY_SCENARIO test --skip-cleanup
+  - node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO
