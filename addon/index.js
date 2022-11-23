@@ -1,43 +1,54 @@
-import Factory from './factory';
-import trait from './trait';
-import association from './association';
-import Response from './response';
-import faker from './faker';
-import Model from './orm/model';
-import Collection from './orm/collection';
-import Serializer from './serializer';
-import ActiveModelSerializer from './serializers/active-model-serializer';
-import JSONAPISerializer from './serializers/json-api-serializer';
-import RestSerializer from './serializers/rest-serializer';
-import HasMany from './orm/associations/has-many';
-import BelongsTo from './orm/associations/belongs-to';
+export {
+  discoverEmberDataModels,
+  applyEmberDataSerializers,
+} from './ember-data';
+export { default as EmberDataSerializer } from 'ember-cli-mirage/serializers/ember-data-serializer';
+
+import { deprecateImport } from './deprecate-imports';
+
+import { initDeprecatedReExports } from './deprecate-reexports';
+initDeprecatedReExports();
+
+import { Factory, Response, HasMany, BelongsTo } from 'miragejs';
+
+const DeprecatedFactory = function (...args) {
+  deprecateImport('Factory');
+
+  return Factory.call(this, ...args);
+};
+
+// Copy extend
+DeprecatedFactory.extend = Factory.extend;
+DeprecatedFactory.extractAfterCreateCallbacks =
+  Factory.extractAfterCreateCallbacks;
+DeprecatedFactory.isTrait = Factory.isTrait;
+
+// // Store a reference on the class for future subclasses
+// DeprecatedFactory.attrs = newAttrs;
+
+class DeprecatedResponse extends Response {
+  constructor(...args) {
+    deprecateImport('Response');
+
+    super(...args);
+  }
+}
 
 function hasMany(...args) {
+  deprecateImport('hasMany');
+
   return new HasMany(...args);
 }
+
 function belongsTo(...args) {
+  deprecateImport('belongsTo');
+
   return new BelongsTo(...args);
 }
 
-export {
-  Factory,
-  trait,
-  association,
-  Response,
-  faker,
-  Model,
-  Collection,
-  Serializer,
-  ActiveModelSerializer,
-  JSONAPISerializer,
-  RestSerializer,
-  hasMany,
-  belongsTo
-};
-
 export default {
-  Factory,
-  Response,
+  Factory: DeprecatedFactory,
+  Response: DeprecatedResponse,
   hasMany,
-  belongsTo
+  belongsTo,
 };
