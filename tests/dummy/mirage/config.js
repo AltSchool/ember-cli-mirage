@@ -1,47 +1,27 @@
-import Mirage from 'ember-cli-mirage';
-import Ember from 'ember';
+import {
+  discoverEmberDataModels,
+  applyEmberDataSerializers,
+} from 'ember-cli-mirage';
+import { createServer } from 'miragejs';
 
-const { isBlank } = Ember;
+export default function (config) {
+  let finalConfig = {
+    ...config,
+    models: { ...discoverEmberDataModels(), ...config.models },
+    serializers: applyEmberDataSerializers(config.serializers),
+    routes,
+  };
 
-export default function() {
-  // Contacts
-  this.get('/contacts');
-  // this.get('/contacts', ['contacts', 'addresses']);
-  this.get('/contacts/:id');
-  this.post('/contacts');
-  this.put('/contacts/:id');
-  this.del('/contacts/:id');
-
-  // Friends
-  this.get('/friends', { coalesce: true });
-
-  // Pets
-  this.get('/pets', function({ db }) {
-    return { pets: db.pets.filter((pet) => pet.alive) };
-  });
-
-  this.post('/pets', function({ db }, req) {
-    let { pet } = JSON.parse(req.requestBody);
-    if (isBlank(pet.name)) {
-      let body = { errors: { name: ["can't be blank"] } };
-      return new Mirage.Response(422, { some: 'header' }, body);
-    } else {
-      return { pet: db.pets.insert(pet) };
-    }
-  });
-
-  this.put('/pets/:id', function({ db }, req) {
-    let { pet } = JSON.parse(req.requestBody);
-    db.pets.update(pet.id, pet);
-    return pet;
-  });
-
-  this.delete('/pets/:id', function() { }, 200);
-
-  this.get('/word-smiths/:id');
-
+  return createServer(finalConfig);
 }
 
-export function testConfig() {
-  this.get('/friends/:id');
+function routes() {
+  //
+  // {
+  //   "message": "API rate limit exceeded for 72.229.126.12. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+  //   "documentation_url": "https://developer.github.com/v3/#rate-limiting"
+  // }
+
+  this.passthrough();
+  this.passthrough('https://api.github.com/*');
 }

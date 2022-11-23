@@ -1,26 +1,18 @@
-import assert from 'ember-cli-mirage/assert';
-import BaseShorthandRouteHandler from './base';
-import { camelize } from 'ember-cli-mirage/utils/inflector';
+import { _routeHandlersShorthandsPost } from 'miragejs';
+import { deprecateNestedImport } from '../../deprecate-imports';
 
-export default class PostShorthandRouteHandler extends BaseShorthandRouteHandler {
-
-  /*
-    Push a new model of type *camelizedModelName* to the db.
-
-    For example, this will push a 'user':
-      this.post('/contacts', 'user');
-  */
-
-  handleStringShorthand(request, modelClass) {
-    let modelName = this.shorthand;
-    let camelizedModelName = camelize(modelName);
-    assert(
-      modelClass,
-      `The route handler for ${request.url} is trying to access the ${camelizedModelName} model, but that model doesn't exist. Create it using 'ember g mirage-model ${modelName}'.`
+/**
+ @class DeprecatedPostShorthandRouteHandler
+ @hide
+ */
+export default class DeprecatedPostShorthandRouteHandler extends _routeHandlersShorthandsPost {
+  constructor(...args) {
+    deprecateNestedImport(
+      `Importing 'PostShorthandRouteHandler' from 'ember-cli-mirage/route-handlers/shorthands/post' is deprecated. ` +
+        `This wasn't intended to be a public API. If you absolute know what you are doing, ` +
+        `install the \`miragejs\` package and use \`import { _routeHandlersShorthandsPost } from 'miragejs';\` instead.`
     );
 
-    let attrs = this._getAttrsForRequest(request, modelClass.camelizedModelName);
-    return modelClass.create(attrs);
+    super(...args);
   }
-
 }

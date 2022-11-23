@@ -1,22 +1,60 @@
-import Ember from 'ember';
-import config from './config/environment';
+import AddonDocsRouter, { docsRoute } from 'ember-cli-addon-docs/router';
+import config from 'dummy/config/environment';
 
-const Router = Ember.Router.extend({
-  location: config.locationType,
-  rootURL: config.rootURL
+export default class Router extends AddonDocsRouter {
+  location = config.locationType;
+  rootURL = config.rootURL;
+}
+
+Router.map(function () {
+  docsRoute(this, function () {
+    this.route('getting-started', function () {
+      this.route('what-is-mirage');
+      this.route('installation');
+      this.route('upgrade-guide');
+      this.route('overview');
+    });
+
+    this.route('route-handlers', function () {
+      this.route('functions');
+      this.route('shorthands');
+    });
+
+    this.route('data-layer', function () {
+      this.route('database');
+      this.route('orm');
+      this.route('models');
+      this.route('relationships');
+      this.route('factories');
+      this.route('fixtures');
+      this.route('serializers', function () {
+        this.route('ember-data-serializer');
+      });
+    });
+
+    this.route('testing', function () {
+      this.route('acceptance-tests');
+      this.route('integration-and-unit-tests');
+      this.route('assertions');
+    });
+
+    this.route('advanced', function () {
+      this.route('environment-options');
+      this.route('server-configuration');
+      this.route('simulating-cookie-responses');
+      this.route('mocking-guids');
+      this.route('customizing-the-inflector');
+      this.route('switching-between-scenarios');
+    });
+
+    this.route('api', function () {
+      this.route('class', { path: '/:class_id' });
+    });
+  });
+
+  this.route('blog', function () {
+    this.route('detail', { path: '/:post_slug_and_id' });
+  });
+
+  this.route('not-found', { path: '/*path' });
 });
-
-Router.map(function() {
-  this.route('contacts', { path: '/' });
-  this.route('contact', { path: '/:contact_id' });
-  this.route('edit', { path: '/:contact_id/edit' });
-
-  this.route('friends');
-  this.route('friend', { path: '/friends/:friend_id' });
-  this.route('close-friends');
-  this.route('pets');
-
-  this.route('word-smith', { path: '/word-smiths/:word_smith_id' });
-});
-
-export default Router;
