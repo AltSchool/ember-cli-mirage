@@ -1,30 +1,17 @@
-import ActiveModelSerializer from './active-model-serializer';
-import { camelize, singularize, pluralize } from '../utils/inflector';
+import { RestSerializer } from 'miragejs';
+import { deprecateNestedImport } from '../deprecate-imports';
 
-export default ActiveModelSerializer.extend({
+/**
+ @class DeprecatedRestSerializer
+ @hide
+ */
+export default class DeprecatedRestSerializer extends RestSerializer {
+  constructor(...args) {
+    deprecateNestedImport(
+      "Importing 'RestSerializer' from 'ember-cli-mirage/serializers/rest-serializer' is deprecated. " +
+        "Add the `miragejs` package to devDependencies and use `import { RestSerializer } from 'miragejs';` instead."
+    );
 
-  keyForModel(type) {
-    return camelize(type);
-  },
-
-  keyForAttribute(attr) {
-    return camelize(attr);
-  },
-
-  keyForRelationship(type) {
-    return camelize(pluralize(type));
-  },
-
-  keyForEmbeddedRelationship(attributeName) {
-    return camelize(attributeName);
-  },
-
-  keyForRelationshipIds(type) {
-    return camelize(pluralize(type));
-  },
-
-  keyForForeignKey(relationshipName) {
-    return camelize(singularize(relationshipName));
+    super(...args);
   }
-
-});
+}

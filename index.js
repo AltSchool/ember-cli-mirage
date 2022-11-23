@@ -1,26 +1,18 @@
-/* eslint-env node */
 'use strict';
-var path = require('path');
-var mergeTrees = require('broccoli-merge-trees');
-var Funnel = require('broccoli-funnel');
+const path = require('path');
+const mergeTrees = require('broccoli-merge-trees');
+const Funnel = require('broccoli-funnel');
+const writeFile = require('broccoli-file-creator');
 
 module.exports = {
-  name: 'ember-cli-mirage',
+  name: require('./package').name,
 
-  options: {
-    nodeAssets: {
-      'route-recognizer': npmAsset({
-        path: 'dist/route-recognizer.js',
-        sourceMap: 'dist/route-recognizer.js.map'
-      }),
-      'fake-xml-http-request': npmAsset('fake_xml_http_request.js'),
-      'pretender': npmAsset('pretender.js'),
-      'faker': npmAsset('build/build/faker.js')
-    }
-  },
+  // isDevelopingAddon: function () {
+  //   return true;
+  // },
 
-  included: function included() {
-    var app;
+  included() {
+    let app;
 
     // If the addon has the _findHost() method (in ember-cli >= 2.7.0), we'll just
     // use that.
@@ -29,14 +21,15 @@ module.exports = {
     } else {
       // Otherwise, we'll use this implementation borrowed from the _findHost()
       // method in ember-cli.
-      var current = this;
+      let current = this;
       do {
         app = current.app || app;
       } while (current.parent.parent && (current = current.parent));
     }
 
     this.app = app;
-    this.addonConfig = this.app.project.config(app.env)['ember-cli-mirage'] || {};
+    this.addonConfig =
+      this.app.project.config(app.env)['ember-cli-mirage'] || {};
     this.addonBuildConfig = this.app.options['ember-cli-mirage'] || {};
 
     // Call super after initializing config so we can use _shouldIncludeFiles for the node assets
@@ -46,61 +39,77 @@ module.exports = {
       this.mirageDirectory = this.addonBuildConfig.directory;
     } else if (this.addonConfig.directory) {
       this.mirageDirectory = this.addonConfig.directory;
-    } else if (app.project.pkg['ember-addon'] && !app.project.pkg['ember-addon'].paths) {
-      this.mirageDirectory = path.resolve(app.project.root, path.join('tests', 'dummy', 'mirage'));
+    } else if (
+      app.project.pkg['ember-addon'] &&
+      app.project.pkg['ember-addon'].configPath
+    ) {
+      this.mirageDirectory = path.resolve(
+        app.project.root,
+        path.join('tests', 'dummy', 'mirage')
+      );
     } else {
       this.mirageDirectory = path.join(this.app.project.root, '/mirage');
     }
-
-    if (this._shouldIncludeFiles()) {
-      app.import('vendor/ember-cli-mirage/pretender-shim.js', {
-        type: 'vendor',
-        exports: { 'pretender': ['default'] }
-      });
-    }
   },
 
-  blueprintsPath: function() {
+  blueprintsPath() {
     return path.join(__dirname, 'blueprints');
   },
 
-  treeFor: function(name) {
-    if (!this._shouldIncludeFiles()) {
-      return;
+  treeFor(name) {
+    let shouldIncludeFiles = this._shouldIncludeFiles();
+    if (shouldIncludeFiles || name === 'vendor') {
+      return this._super.treeFor.apply(this, arguments);
     }
 
-    return this._super.treeFor.apply(this, arguments);
+    if (name === 'app') {
+      // Include a noop initializer, even if Mirage is excluded from the build
+      return writeFile(
+        'initializers/ember-cli-mirage.js',
+        `
+        export default {
+          name: 'ember-cli-mirage',
+          initialize() {}
+        };
+      `
+      );
+    }
   },
 
-  _lintMirageTree: function(mirageTree) {
-    var lintedMirageTrees;
+  _lintMirageTree(mirageTree) {
+    let lintedMirageTrees;
     // _eachProjectAddonInvoke was added in ember-cli@2.5.0
     // this conditional can be removed when we no longer support
     // versions older than 2.5.0
     if (this._eachProjectAddonInvoke) {
-      lintedMirageTrees = this._eachProjectAddonInvoke('lintTree', ['mirage', mirageTree]);
+      lintedMirageTrees = this._eachProjectAddonInvoke('lintTree', [
+        'mirage',
+        mirageTree,
+      ]);
     } else {
-      lintedMirageTrees = this.project.addons.map(function(addon) {
-        if (addon.lintTree) {
-          return addon.lintTree('mirage', mirageTree);
-        }
-      }).filter(Boolean);
+      lintedMirageTrees = this.project.addons
+        .map(function (addon) {
+          if (addon.lintTree) {
+            return addon.lintTree('mirage', mirageTree);
+          }
+        })
+        .filter(Boolean);
     }
 
-    var lintedMirage = mergeTrees(lintedMirageTrees, {
+    let lintedMirage = mergeTrees(lintedMirageTrees, {
       overwrite: true,
-      annotation: 'TreeMerger (mirage-lint)'
+      annotation: 'TreeMerger (mirage-lint)',
     });
 
     return new Funnel(lintedMirage, {
-      destDir: 'tests/mirage/'
+      destDir: 'tests/mirage/',
     });
   },
 
-  treeForApp: function(appTree) {
-    var trees = [ appTree ];
-    var mirageFilesTree = new Funnel(this.mirageDirectory, {
-      destDir: 'mirage'
+  treeForApp(appTree) {
+    let trees = [appTree];
+    let mirageFilesTree = new Funnel(this.mirageDirectory, {
+      destDir: 'mirage',
     });
     trees.push(mirageFilesTree);
 
@@ -111,28 +120,27 @@ module.exports = {
     return mergeTrees(trees);
   },
 
-  _shouldIncludeFiles: function() {
+  _shouldIncludeFiles() {
     if (process.env.EMBER_CLI_FASTBOOT) {
       return false;
     }
 
-    var environment = this.app.env;
-    var enabledInProd = environment === 'production' && this.addonConfig.enabled;
-    var explicitExcludeFiles = this.addonConfig.excludeFilesFromBuild;
+    let environment = this.app.env;
+    let enabledInProd =
+      environment === 'production' && this.addonConfig.enabled;
+    let explicitExcludeFiles = this.addonConfig.excludeFilesFromBuild;
     if (enabledInProd && explicitExcludeFiles) {
-      throw new Error('Mirage was explicitly enabled in production, but its files were excluded '
-                      + 'from the build. Please, use only ENV[\'ember-cli-mirage\'].enabled in '
-                      + 'production environment.');
+      throw new Error(
+        'Mirage was explicitly enabled in production, but its files were excluded ' +
+          "from the build. Please, use only ENV['ember-cli-mirage'].enabled in " +
+          'production environment.'
+      );
     }
-    return enabledInProd || (environment && environment !== 'production' && explicitExcludeFiles !== true);
-  }
+    return (
+      enabledInProd ||
+      (environment &&
+        environment !== 'production' &&
+        explicitExcludeFiles !== true)
+    );
+  },
 };
-
-function npmAsset(filePath) {
-  return function() {
-    return {
-      enabled: this._shouldIncludeFiles(),
-      import: [filePath]
-    };
-  };
-}
