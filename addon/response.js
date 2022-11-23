@@ -1,18 +1,17 @@
-export default class Response {
+import { Response } from 'miragejs';
+import { deprecateNestedImport } from './deprecate-imports';
 
-  constructor(code, headers = {}, data = {}) {
-    this.code = code;
-    this.headers = headers;
-    this.data = data;
+/**
+ @class DeprecatedResponse
+ @hide
+ */
+export default class DeprecatedResponse extends Response {
+  constructor(...args) {
+    deprecateNestedImport(
+      `Importing 'Response' from 'ember-cli-mirage/response' is deprecated. ` +
+        `Install the \`miragejs\` package and use \`import { Response } from 'miragejs';\` instead.`
+    );
+
+    super(...args);
   }
-
-  toRackResponse() {
-    let { headers } = this;
-    if (!headers.hasOwnProperty('Content-Type')) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    return [this.code, this.headers, this.data];
-  }
-
 }

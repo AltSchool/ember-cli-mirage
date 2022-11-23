@@ -1,5 +1,8 @@
-import DS from 'ember-data';
+import RestSerializer from '@ember-data/serializer/rest';
 
-const { JSONAPISerializer } = DS;
-
-export default JSONAPISerializer;
+export default class extends RestSerializer {
+  attrs = {
+    address: 'addressId',
+    blogPosts: { deserialize: 'records' },
+  };
+}
