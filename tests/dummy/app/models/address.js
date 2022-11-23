@@ -1,9 +1,3 @@
-import DS from 'ember-data';
+import Model from '@ember-data/model';
 
-const { Model, attr, belongsTo } = DS;
-
-export default Model.extend({
-  street: attr('string'),
-
-  contact: belongsTo('contact')
-});
+export default class extends Model {}
