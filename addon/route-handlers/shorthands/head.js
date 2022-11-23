@@ -1,44 +1,18 @@
-import assert from 'ember-cli-mirage/assert';
-import BaseShorthandRouteHandler from './base';
-import { Response } from 'ember-cli-mirage';
-import { camelize } from 'ember-cli-mirage/utils/inflector';
+import { _routeHandlersShorthandsHead } from 'miragejs';
+import { deprecateNestedImport } from '../../deprecate-imports';
 
-export default class HeadShorthandRouteHandler extends BaseShorthandRouteHandler {
-
-  /*
-    Retrieve a model/collection from the db.
-
-    Examples:
-      this.head('/contacts', 'contact');
-      this.head('/contacts/:id', 'contact');
-  */
-  handleStringShorthand(request, modelClass) {
-    let modelName = this.shorthand;
-    let camelizedModelName = camelize(modelName);
-
-    assert(
-      modelClass,
-      `The route handler for ${request.url} is trying to access the ${camelizedModelName} model, but that model doesn't exist. Create it using 'ember g mirage-model ${modelName}'.`
+/**
+ @class DeprecatedHeadShorthandRouteHandler
+ @hide
+ */
+export default class DeprecatedHeadShorthandRouteHandler extends _routeHandlersShorthandsHead {
+  constructor(...args) {
+    deprecateNestedImport(
+      `Importing 'HeadShorthandRouteHandler' from 'ember-cli-mirage/route-handlers/shorthands/head' is deprecated. ` +
+        `This wasn't intended to be a public API. If you absolute know what you are doing, ` +
+        `install the \`miragejs\` package and use \`import { _routeHandlersShorthandsHead } from 'miragejs';\` instead.`
     );
 
-    let id = this._getIdForRequest(request);
-    if (id) {
-      let model = modelClass.find(id);
-      if (!model) {
-        return new Response(404);
-      } else {
-        return new Response(204);
-      }
-    } else if (this.options.coalesce && request.queryParams && request.queryParams.ids) {
-      let model = modelClass.find(request.queryParams.ids);
-
-      if (!model) {
-        return new Response(404);
-      } else {
-        return new Response(204);
-      }
-    } else {
-      return new Response(204);
-    }
+    super(...args);
   }
 }
